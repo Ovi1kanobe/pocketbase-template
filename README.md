@@ -23,5 +23,6 @@ A Makefile is included to manage the Go toolchain and compile the project.
 - Migration files live in `app/migrations` and are automatically registered.
 - Use `make clean` to remove build artifacts.
 - Run `make update-pocketbase` to fetch the latest PocketBase version.
+- Run `make fmt` to format the code and `make vet` to perform static analysis.
 
 The Makefile downloads the Go toolchain defined in `Makefile`, so you do not need Go installed globally.

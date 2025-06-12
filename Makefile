@@ -83,3 +83,16 @@ update-pocketbase:
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) get github.com/pocketbase/pocketbase@latest
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) mod tidy
 	echo "PocketBase updated."
+
+
+.PHONY: fmt
+fmt: $(GO_BIN)
+	cd $(MAKEFILE_DIR)app && $(GO_BIN) fmt ./...
+
+.PHONY: vet
+vet: $(GO_BIN)
+	cd $(MAKEFILE_DIR)app && $(GO_BIN) vet ./...
+
+.PHONY: test
+test: $(GO_BIN)
+	cd $(MAKEFILE_DIR)app && $(GO_BIN) test ./...
