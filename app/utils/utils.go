@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 )
 
-
 func GoDotEnvVariable(key string) string {
 
 	// load .env file

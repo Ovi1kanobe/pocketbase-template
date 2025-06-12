@@ -1,11 +1,11 @@
 package main
 
 import (
-	_ "pocketbase-template/migrations"
 	"flag"
 	"fmt"
 	"log"
 	"os"
+	_ "pocketbase-template/migrations"
 
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
@@ -23,13 +23,11 @@ func main() {
 	}
 	app := pocketbase.New()
 	log.Println("Version: ", Version)
-	
 
 	// When a collection is created in the UI, a new migration file is created
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		Automigrate: false,
 	})
-
 
 	if err := app.Start(); err != nil {
 		log.Fatal(err)

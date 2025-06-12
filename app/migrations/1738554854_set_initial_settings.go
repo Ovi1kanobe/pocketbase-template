@@ -1,23 +1,23 @@
 package migrations
 
 import (
-    "github.com/pocketbase/pocketbase/core"
-    m "github.com/pocketbase/pocketbase/migrations"
+	"github.com/pocketbase/pocketbase/core"
+	m "github.com/pocketbase/pocketbase/migrations"
 
 	"pocketbase-template/utils"
 )
 
 func init() {
-    m.Register(func(app core.App) error {
-        settings := app.Settings()
+	m.Register(func(app core.App) error {
+		settings := app.Settings()
 
-        // for all available settings fields you could check
-        // https://github.com/pocketbase/pocketbase/blob/develop/core/settings_model.go#L121-L130
-        settings.Meta.AppName = utils.GoDotEnvVariable("PB_APP_NAME")
-        settings.Meta.AppURL = utils.GoDotEnvVariable("PB_APP_URL")
-        settings.Logs.MaxDays = 4
-        settings.Logs.LogAuthId = true
-        settings.Logs.LogIP = true
+		// for all available settings fields you could check
+		// https://github.com/pocketbase/pocketbase/blob/develop/core/settings_model.go#L121-L130
+		settings.Meta.AppName = utils.GoDotEnvVariable("PB_APP_NAME")
+		settings.Meta.AppURL = utils.GoDotEnvVariable("PB_APP_URL")
+		settings.Logs.MaxDays = 4
+		settings.Logs.LogAuthId = true
+		settings.Logs.LogIP = true
 		smtpEnabled := utils.GoDotEnvVariable("PB_SMTP_ENABLED")
 		if smtpEnabled == "true" {
 			settings.SMTP.Enabled = true
@@ -37,6 +37,6 @@ func init() {
 			settings.S3.Secret = utils.GoDotEnvVariable("PB_S3_SECRET")
 		}
 
-        return app.Save(settings)
-    }, nil)
+		return app.Save(settings)
+	}, nil)
 }
