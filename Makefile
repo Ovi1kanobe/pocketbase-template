@@ -37,7 +37,7 @@ ifeq ($(TARGET_ARCH),x86_64)
 endif
 
 # Define the output binary name using target architecture
-OUTPUT_BIN := $(BIN_DIR)/APPNAME_$(VERSION)_$(HOST_OS)_$(TARGET_ARCH)
+OUTPUT_BIN := $(BIN_DIR)/$(APPNAME)_$(VERSION)_$(HOST_OS)_$(TARGET_ARCH)
 
 # Download and extract Go
 $(GO_BIN):
