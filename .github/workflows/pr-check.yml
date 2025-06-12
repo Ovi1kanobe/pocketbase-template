@@ -1,0 +1,51 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  version_check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          # Fetch full history so that git merge-base can be computed.
+          fetch-depth: 0
+
+      - name: Determine base branch and fetch it
+        id: determine
+        run: |
+          # If running on a pull request, github.base_ref will be set.
+          if [ -n "${{ github.base_ref }}" ]; then
+            BASE_BRANCH="${{ github.base_ref }}"
+          else
+            BASE_BRANCH="main"
+          fi
+          echo "Using base branch: $BASE_BRANCH"
+          echo "BASE_BRANCH=$BASE_BRANCH" >> $GITHUB_ENV
+          # Fetch the full base branch history.
+          git fetch origin "$BASE_BRANCH"
+
+      - name: Check if VERSION file changed
+        id: check
+        run: |
+          # Compute the merge base between the base branch and HEAD.
+          MERGE_BASE=$(git merge-base origin/"$BASE_BRANCH" HEAD)
+          if [ -z "$MERGE_BASE" ]; then
+            echo "No merge base found between origin/$BASE_BRANCH and HEAD" >&2
+            exit 1
+          fi
+          echo "Merge base: $MERGE_BASE"
+          # List the files changed since the merge base.
+          CHANGED_FILES=$(git diff --name-only "$MERGE_BASE" HEAD)
+          echo "Changed files: $CHANGED_FILES"
+          # Check if VERSION is among the changed files.
+          if echo "$CHANGED_FILES" | grep -q "^VERSION$"; then
+            echo "VERSION file updated."
+          else
+            echo "ERROR: VERSION file was not updated. Please bump the version." >&2
+            exit 1
+          fi
