@@ -1,5 +1,5 @@
 # Configuration Variables
-GO_VERSION := 1.24.3
+GO_VERSION := 1.24.4
 
 # Determine host OS and architecture for downloading Go
 HOST_OS := $(shell uname -s | tr '[:upper:]' '[:lower:]')
@@ -15,14 +15,14 @@ GO_URL := https://dl.google.com/go/go$(GO_VERSION).$(HOST_OS)-$(HOST_ARCH).tar.g
 MAKEFILE_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 PB_BUILD_DIR := $(MAKEFILE_DIR)build
 DEPS_DIR := $(PB_BUILD_DIR)/deps
+
 GO_DIR := $(DEPS_DIR)/go
 GO_BIN := $(GO_DIR)/bin/go
+
 BIN_DIR := $(PB_BUILD_DIR)/bin
 
 # MACHINE Variables
 MACHINE_IP := $(shell hostname -I | awk '{print $$1}')
-
-# Read version from the VERSION file.
 VERSION := $(shell cat VERSION)
 APPNAME := $(shell cat APPNAME)
 
@@ -39,20 +39,25 @@ endif
 # Define the output binary name using target architecture
 OUTPUT_BIN := $(BIN_DIR)/$(APPNAME)_$(VERSION)_$(HOST_OS)_$(TARGET_ARCH)
 
-# Download and extract Go
-$(GO_BIN):
+.PHONY: install-go
+install-go:
 	@echo "Downloading and extracting Go $(GO_VERSION)..."
 	mkdir -p $(GO_DIR)
 	curl -sSL $(GO_URL) | tar -C $(DEPS_DIR) -xz
 	chmod +x $(GO_BIN)
 
-$(MAKEFILE_DIR)app/go.mod:
+$(MAKEFILE_DIR)app/go.mod | $(GO_BIN):
 	echo "Creating go.mod file..."
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) mod init $(APPNAME)
 
+# ── Keep go.mod's 'go' directive in sync with GO_VERSION ──────────────────────
+.PHONY: sync-go-version
+sync-go-version: install-go | $(MAKEFILE_DIR)app/go.mod
+	@cd $(MAKEFILE_DIR)app && $(GO_BIN) mod edit -go=$(GO_VERSION)
+
 # Build PocketBase
 .PHONY: build
-build: $(GO_BIN) $(MAKEFILE_DIR)app/go.mod
+build: install-go $(MAKEFILE_DIR)app/go.mod
 	echo "$(APPNAME) version $(VERSION)..."
 	mkdir -p $(BIN_DIR)
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) mod tidy 
@@ -86,13 +91,13 @@ update-pocketbase:
 
 
 .PHONY: fmt
-fmt: $(GO_BIN)
+fmt: install-go
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) fmt ./...
 
 .PHONY: vet
-vet: $(GO_BIN)
+vet: install-go
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) vet ./...
 
 .PHONY: test
-test: $(GO_BIN)
+test: install-go
 	cd $(MAKEFILE_DIR)app && $(GO_BIN) test ./...
