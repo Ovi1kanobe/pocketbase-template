@@ -1,5 +1,2 @@
-pb_data/
-pocketbase
 .env
-pb_hooks/config.json
 build
