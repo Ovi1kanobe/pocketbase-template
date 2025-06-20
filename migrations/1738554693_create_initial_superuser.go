@@ -4,7 +4,7 @@ import (
 	"github.com/pocketbase/pocketbase/core"
 	m "github.com/pocketbase/pocketbase/migrations"
 
-	"pocketbase-template/utils"
+	"github.com/Ovi1kanobe/pocketbase-template/utils"
 )
 
 func init() {
