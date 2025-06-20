@@ -1,4 +1,4 @@
-module pocketbase-template
+module github.com/Ovi1kanobe/pocketbase-template
 
 go 1.24.4
 
