@@ -9,104 +9,54 @@ permissions:
   contents: write
 
 jobs:
-  create_release:
+  goreleaser:
     runs-on: ubuntu-latest
-    outputs:
-      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    env:
+      flags: ""
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      # re-enable auto-snapshot from goreleaser-action@v3
+      # (https://github.com/goreleaser/goreleaser-action-v4-auto-snapshot-example)
+      - if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
+        run: echo "flags=--snapshot" >> $GITHUB_ENV
 
-      - name: Set VERSION environment variable
-        id: set_version
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version is: $VERSION"
-
-      - name: Create GitHub Release
-        id: create_release
-        uses: ncipollo/release-action@v1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          tag: "v${{ env.VERSION }}"
-          name: "Release v${{ env.VERSION }}"
-          body: "Automated release for version v${{ env.VERSION }}."
+          fetch-depth: 0
 
-  build_and_upload:
-    needs: create_release
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, 386, arm64]  # Build for x86 (amd64), 386, and arm64
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.17.0
 
-      - name: Set VERSION environment variable
-        id: set_version
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Version is: $VERSION"
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '>=1.23.10'
 
-      - name: Set APPNAME environment variable
-        run: |
-          APPNAME=$(cat APPNAME)
-          echo "APPNAME=$APPNAME" >> $GITHUB_ENV
-          echo "Application name is: $APPNAME"
+      # This step usually is not needed because the /ui/dist is pregenerated locally
+      # but its here to ensure that each release embeds the latest admin ui artifacts.
+      # If the artificats differs, a "dirty error" is thrown - https://goreleaser.com/errors/dirty/
+      - name: Build Admin dashboard UI
+        run: npm --prefix=./ui ci && npm --prefix=./ui run build
 
-      - name: Set platform variables
-        id: set_platform
-        run: |
-          OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-          echo "OS_LOWER=$OS" >> $GITHUB_ENV
-          echo "ARCH_LOWER=${{ matrix.arch }}" >> $GITHUB_ENV
-          echo "Platform is: $OS ${{ matrix.arch }}"
+      # Temporary disable as the types can have random generated identifiers making it non-deterministic.
+      #
+      # # Similar to the above, the jsvm types are pregenerated locally
+      # # but its here to ensure that it wasn't forgotten to be executed.
+      # - name: Generate jsvm types
+      #   run: go run ./plugins/jsvm/internal/types/types.go
 
-      - name: Build binary
-        run: |
-          GOOS=$(uname -s | tr '[:upper:]' '[:lower:]') GOARCH=${{ matrix.arch }} make build
+      - name: Run tests
+        run: go test ./...
 
-      - name: List build directory
-        run: ls -la ./build/bin
-
-      - name: Upload Release Asset (binary)
-        uses: actions/upload-release-asset@v1
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          args: release --clean ${{ env.flags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_path: ./build/bin/${{ env.APPNAME }}_${{ env.VERSION }}_${{ env.OS_LOWER }}_${{ env.ARCH_LOWER }}
-          asset_name: ${{ env.APPNAME }}_${{ env.OS_LOWER }}_${{ env.ARCH_LOWER }}
-          asset_content_type: application/octet-stream
 
-  notify_download_server:
-    needs: build_and_upload          # wait for all builds / uploads
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
 
-      - name: Read VERSION
-        run: |
-          VERSION=$(cat VERSION)
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-
-      - name: Trigger release-download webhook
-        env:
-          WEBHOOK_URL:     ${{ vars.WEBHOOK_URL }}
-          WEBHOOK_SECRET:  ${{ secrets.WEBHOOK_SECRET }}
-          VERSION:         ${{ env.VERSION }}
-        run: |
-          # ---- build the JSON body ----
-          BODY=$(jq -n --arg ev "release" --arg tag "v$VERSION" '{event:$ev, tag:$tag}')
-          # ---- compute HMAC-SHA-256 signature ----
-          SIG="sha256=$(printf '%s' "$BODY" \
-                | openssl dgst -sha256 -hmac "$WEBHOOK_SECRET" | awk '{print $2}')"
-          # ---- POST ----
-          echo "Posting to $WEBHOOK_URL"
-          curl -sSL -X POST \
-            -H "Content-Type: application/json" \
-            -H "X-Hub-Signature-256: $SIG" \
-            --data "$BODY" \
-            "$WEBHOOK_URL"
