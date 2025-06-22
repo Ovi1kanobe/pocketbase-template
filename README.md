@@ -1,4 +1,4 @@
 # PocketBase Makefile Template
 
-This repository provides a minimal setup for running a [PocketBase](https://pocketbase.io) instance.
+This repository provides a minimal setup for developing a [PocketBase](https://pocketbase.io) project.
 
