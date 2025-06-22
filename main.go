@@ -2,7 +2,6 @@ package main
 
 import (
 	"log"
-	_ "github.com/Ovi1kanobe/pocketbase-template/migrations"
 
 	"github.com/pocketbase/pocketbase"
 )
