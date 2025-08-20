@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "@fontsource/fira-sans/500.css";
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* base typography */
+  font-family: "Fira Sans", sans-serif;
+  line-height: 1.5;
+  color-scheme: light dark;
+  color: rgba(249, 249, 249, 0.87);
+  background-color: #242424;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  --radius: 0.625rem;
+
+  /* neutrals and surfaces */
+  --background: #f4f4f4;
+  --foreground: #1b1e29; /* dark slate for primary text:contentReference[oaicite:7]{index=7} */
+  --card: #ffffff;
+  --card-foreground: #1b1e29;
+  --popover: #ffffff;
+  --popover-foreground: #1b1e29;
+
+  /* brand colours */
+  --primary: #205493; /* corporate navy:contentReference[oaicite:8]{index=8} */
+  --primary-foreground: #ffffff;
+  --secondary: #5b616b; /* neutral mid‑gray:contentReference[oaicite:9]{index=9} */
+  --secondary-foreground: #ffffff;
+  --accent: #9bdaf1; /* soft blue accent:contentReference[oaicite:10]{index=10} */
+  --accent-foreground: #112e51;
+  --destructive: #cd2026; /* red for errors:contentReference[oaicite:11]{index=11} */
+
+  /* muted and borders */
+  --muted: #e1f3f8; /* very light blue:contentReference[oaicite:12]{index=12} */
+  --muted-foreground: #667b83;
+  --border: #dce4ef; /* cool light blue border:contentReference[oaicite:13]{index=13} */
+  --input: #ffffff;
+  --ring: #00a6d2; /* medium blue focus ring:contentReference[oaicite:14]{index=14} */
+
+  /* sidebar */
+  --sidebar: #112e51; /* darkest blue for sidebar:contentReference[oaicite:15]{index=15} */
+  --sidebar-foreground: #f4f4f4;
+  --sidebar-primary: #205493;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #9bdaf1;
+  --sidebar-accent-foreground: #112e51;
+  --sidebar-border: #dce4ef;
+  --sidebar-ring: #00a6d2;
+}
+
+.font-special {
+  font-family: "Cinzel Variable", serif;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+.dark {
+  /* dark mode values: invert light surfaces while keeping contrast high */
+  --background: #1b1e29; /* dark neutral background */
+  --foreground: #e1f3f8; /* pale blue text */
+  --card: #24344e;
+  --card-foreground: #e1f3f8;
+  --popover: #24344e;
+  --popover-foreground: #e1f3f8;
+
+  --primary: #205493;
+  --primary-foreground: #e1f3f8;
+  --secondary: #e1f3f8;
+  --secondary-foreground: #1b1e29;
+  --accent: #9bdaf1;
+  --accent-foreground: #1b1e29;
+  --destructive: #cd2026;
+
+  --muted: #24344e;
+  --muted-foreground: #9bdaf1;
+  --border: #112e51;
+  --input: #112e51;
+  --ring: #205493;
+
+  --sidebar: #112e51;
+  --sidebar-foreground: #e1f3f8;
+  --sidebar-primary: #205493;
+  --sidebar-primary-foreground: #e1f3f8;
+  --sidebar-accent: #9bdaf1;
+  --sidebar-accent-foreground: #1b1e29;
+  --sidebar-border: #112e51;
+  --sidebar-ring: #205493;
+}

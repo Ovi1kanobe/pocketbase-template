@@ -1,3 +1,5 @@
 .env
 build
 pb_data
+coverage.out
+*.tar.gz
