@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	_ "github.com/Ovi1kanobe/pocketbase-template/migrations"
 	"github.com/pocketbase/pocketbase"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/apis"
