@@ -9,8 +9,7 @@ test-report:
 typegen:
 	bunx pocketbase-typegen --db ./pb_data/data.db --out ./frontend/src/lib/pocketbase-types.ts
 
-build: test-report typegen
-
+build: test typegen
 	echo "VITE_PB_URL=/" > ./frontend/.env
 	cd frontend && bun run build
 	rm -rf build 
