@@ -1,37 +1,51 @@
-name: Go Build and Release
+# .github/workflows/release.yml
+name: Build & Release (linux/amd64 + linux/arm64)
+
+permissions:
+  contents: write  # needed to create/update releases
 
 on:
-  pull_request:
-    branches:
-      - main
   push:
     tags:
-      - 'v*'
+      - 'v*'   # e.g. v1.2.3
 
 jobs:
-  goreleaser:
+  build-and-upload:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [amd64, arm64]
 
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for GoReleaser to compute changelogs
+          fetch-depth: 0
 
-      - name: Set up Go
+      - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '>=1.23.10'
 
-      - name: Run tests
-        run: go test ./...
-
-      - name: Run GoReleaser (only on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: goreleaser/goreleaser-action@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
         with:
-          distribution: goreleaser
-          version: '~> v2'
-          args: release --clean
+          bun-version: latest
+
+      - name: Build for linux/${{ matrix.arch }}
+        env:
+          GOOS: linux
+          GOARCH: ${{ matrix.arch }}
+        run: |
+          # Your existing build: produces athletix.tar.gz
+          make zip
+          # Rename to include OS/arch so assets don't collide
+          mv athletix.tar.gz "athletix-linux-${GOARCH}.tar.gz"
+
+      - name: Upload to GitHub Release for this tag
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            athletix-linux-${{ matrix.arch }}.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
