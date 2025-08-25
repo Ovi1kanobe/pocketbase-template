@@ -7,10 +7,12 @@ test-report:
 
 # Generate PocketBase TypeScript types
 typegen:
+	env -u GOOS -u GOARCH go run . migrate up
 	bunx pocketbase-typegen --db ./pb_data/data.db --out ./frontend/src/lib/pocketbase-types.ts
 
-build: test typegen
+build: typegen
 	echo "VITE_PB_URL=/" > ./frontend/.env
+	cd frontend && bun install
 	cd frontend && bun run build
 	rm -rf build 
 	mkdir -p build
